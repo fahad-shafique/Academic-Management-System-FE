@@ -1,0 +1,108 @@
+/* Top Menu Bar */
+.top-menu-bar {
+  box-sizing: border-box;
+  position: absolute;
+  height: 80px;
+  left: 0;
+  right: 0;
+  top: 0;
+  background: #E7EDF2;
+  border-bottom: 1px solid #BDCEDB;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+}
+
+/* Logo */
+.menu-logo {
+  width: 132.5px;
+  height: 40px;
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+/* Search Bar */
+.search-bar {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  padding: 8px 16px;
+  gap: 110px;
+  width: 220px;
+  height: 32px;
+  background: #FFFFFF;
+  border: 1px solid #BDCEDB;
+  border-radius: 6px;
+}
+
+.search-bar input {
+  width: 100%;
+  border: none;
+  outline: none;
+  font-size: 16px;
+  color: #9A9B9F;
+}
+
+.search-icon {
+  width: 16px;
+  height: 16px;
+  background: url('https://cdnjs.cloudflare.com/ajax/libs/feather-icons/4.28.0/icons/search.svg') no-repeat center center;
+  background-size: contain;
+}
+
+/* Notification Icon */
+.notification-icon {
+  width: 20px;
+  height: 20px;
+  background: url('https://cdnjs.cloudflare.com/ajax/libs/feather-icons/4.28.0/icons/bell.svg') no-repeat center center;
+  background-size: contain;
+}
+
+
+/* Profile Icon */
+.profile-icon {
+  width: 32px;
+  height: 32px;
+  background-size: cover;
+  background-position: center;
+  border-radius: 50%;
+  position: absolute;
+  left: 288px;
+  top: 0;
+}
+
+/* Menu Items */
+.menu-items {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: absolute;
+  max-width: 750px;
+  height: 30px;
+  left: 270px;
+  background: #BDCEDB;
+  border-radius: 41px;
+  padding: 8px;
+}
+
+.menu-item {
+  padding: 8px 10px;
+  border-radius: 29px;
+  font-size: 16px;
+  color: #3E3E40;
+}
+
+.menu-item:hover {
+  background: #13507F;
+  color: #FFFFFF;
+}
+
+.menu-item + .menu-item {
+  margin-left: 8px;
+}
+
+a {
+  text-decoration: none;  /* Remove underline */
+  color: inherit;         /* Inherit color from parent element */
+}
