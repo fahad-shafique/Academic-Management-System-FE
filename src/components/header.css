@@ -1,7 +1,7 @@
 /* Top Menu Bar */
 .top-menu-bar {
   box-sizing: border-box;
-  position: absolute;
+  position: fixed;
   height: 80px;
   left: 0;
   right: 0;
@@ -59,19 +59,6 @@
   background-size: contain;
 }
 
-
-/* Profile Icon */
-.profile-icon {
-  width: 32px;
-  height: 32px;
-  background-size: cover;
-  background-position: center;
-  border-radius: 50%;
-  position: absolute;
-  left: 288px;
-  top: 0;
-}
-
 /* Menu Items */
 .menu-items {
   display: flex;
@@ -105,4 +92,9 @@
 a {
   text-decoration: none;  /* Remove underline */
   color: inherit;         /* Inherit color from parent element */
+}
+
+.profile-icon {
+  margin-left: auto; /* This will push the icon to the far right */
+  padding: 10px; /* Add padding if needed */
 }

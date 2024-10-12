@@ -2,6 +2,9 @@ import React, { useState, useEffect, useContext } from 'react';
 import AuthContext from '../context/AuthContext';
 import Header from "../components/Header";
 import axios from 'axios';
+import SideBar from "../components/SideBar";
+import { Container, Typography, Card, CardContent, CardActions, Button, styled } from '@mui/material';
+import './Profile.css';
 
 const HomePage = () => {
     const { user, setUser } = useContext(AuthContext);
@@ -11,7 +14,6 @@ const HomePage = () => {
     useEffect(() => {
         const fetchUserData = async () => {
             try {
-                debugger
                 const response = await axios.get('http://127.0.0.1:8000/api/auth/user', {
                     headers: {
                         'Authorization': `Bearer ${authTokens.access}`
@@ -25,64 +27,92 @@ const HomePage = () => {
         };
 
         fetchUserData();
-    }, [user.accessToken, setUser]);
+    }, [authTokens.access, setUser]);
 
-    if (!userData) {
-        return <div>Loading...</div>;
+    const items = [
+        { name: 'Dashboard', link: '/' },
+        { name: '> Personal Profile', link: '/profile' },
+    ];
+
+    if (user && (user.user_type === 'admin' || user.user_type === 'faculty')) {
+        items.push({ name: 'Students', link: '/students' });
     }
 
+    if (!userData) {
+        return <Typography>Loading...</Typography>;
+    }
+    debugger
+
     return (
-        <div>
+        <Container className="container">
             <Header />
+            <SideBar 
+          items={[
+            { name: 'Dashboard', link: '/' },
+            { name: 'Students', link: '/students' },
+            { name: 'Departments & Degrees', link: '/departments' },
+          ]} />
             <div className="dashboard">
-                <div className="profile-header">
-                    <img src="profile-picture-url.jpg" alt="Profile" />
-                    <div className="info">
-                        <h1>{userData.username}</h1>
-                        <p>{userData.email}</p>
-                    </div>
-                </div>
-                <div className="profile-details">
-                    <h2>Profile Details</h2>
-                    {Object.entries(userData).map(([key, value]) => (
-                        <div className="detail" key={key}>
-                            <span>{key.replace(/_/g, ' ').replace(/^\w/, c => c.toUpperCase())}:</span>
-                            <span>{value}</span>
+                <Card className="profile-header">
+                    <CardContent>
+                        <Typography variant="h4" gutterBottom>{`${userData.first_name} ${userData.last_name}`}</Typography>
+                        <img src="profile-picture-url.jpg" alt="Profile" className="profile-picture"/>
+                        <Typography variant="body1">{userData.email}</Typography>
+                    </CardContent>
+                </Card>
+                <Card className="profile-details">
+                    <CardContent style={{ display: 'flex' }}>
+                        <div style={{ flex: 1 }}>
+                            <Typography variant="h6">Profile Details</Typography>
+                            {Object.entries(userData).map(([key, value]) => (
+                                <div className="detail" key={key}>
+                                    <Typography variant="body2" className="detail-label">
+                                        {key.replace(/_/g, ' ').replace(/^\w/, c => c.toUpperCase())}:
+                                    </Typography>
+                                    <Typography variant="body2" className="detail-value">
+                                        {value}
+                                    </Typography>
+                                </div>
+                            ))}
                         </div>
-                    ))}
-                </div>
-                <div className="recent-activity">
-                    <h2>Recent Activity</h2>
-                    <div className="activity">
-                        <span>Logged in</span>
-                        <span>May 19, 2024</span>
-                    </div>
-                    <div className="activity">
-                        <span>Updated profile</span>
-                        <span>May 18, 2024</span>
-                    </div>
-                    <div className="activity">
-                        <span>Changed password</span>
-                        <span>May 17, 2024</span>
-                    </div>
-                </div>
-                <div className="settings">
-                    <h2>Settings</h2>
-                    <div className="setting">
-                        <span>Change Password</span>
-                        <span>Edit</span>
-                    </div>
-                    <div className="setting">
-                        <span>Privacy Settings</span>
-                        <span>Edit</span>
-                    </div>
-                    <div className="setting">
-                        <span>Notification Preferences</span>
-                        <span>Edit</span>
-                    </div>
-                </div>
+                    </CardContent>
+                </Card>
+                <Card className="recent-activity">
+                    <CardContent>
+                        <Typography variant="h6">Recent Activity</Typography>
+                        <div className="activity">
+                            <Typography variant="body2">Logged in</Typography>
+                            <Typography variant="body2">May 19, 2024</Typography>
+                        </div>
+                        <div className="activity">
+                            <Typography variant="body2">Updated profile</Typography>
+                            <Typography variant="body2">May 18, 2024</Typography>
+                        </div>
+                        <div className="activity">
+                            <Typography variant="body2">Changed password</Typography>
+                            <Typography variant="body2">May 17, 2024</Typography>
+                        </div>
+                    </CardContent>
+                </Card>
+                <Card className="settings">
+                    <CardContent>
+                        <Typography variant="h6">Settings</Typography>
+                        <div className="setting">
+                            <Typography variant="body2">Change Password</Typography>
+                            <Button size="small">Edit</Button>
+                        </div>
+                        <div className="setting">
+                            <Typography variant="body2">Privacy Settings</Typography>
+                            <Button size="small">Edit</Button>
+                        </div>
+                        <div className="setting">
+                            <Typography variant="body2">Notification Preferences</Typography>
+                            <Button size="small">Edit</Button>
+                        </div>
+                    </CardContent>
+                </Card>
             </div>
-        </div>
+        </Container>
     );
 }
 
