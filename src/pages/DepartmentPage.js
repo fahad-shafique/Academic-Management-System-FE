@@ -103,6 +103,7 @@ const DepartmentPage = () => { // Changed from Dashboard to DepartmentPage
             <SideBar
               items={[
                 { name: 'Dashboard', link: '/' },
+            { name: 'Users', link: '/users' },
                 { name: 'Students', link: '/students' },
                 { name: 'Departments & Degrees', link: '/departments' },
               ]}

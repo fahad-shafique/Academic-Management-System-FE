@@ -1,5 +1,4 @@
-// Dashboard.js
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Grid, Paper, Typography } from '@mui/material';
 import { Bar, Line, Doughnut } from 'react-chartjs-2';
 import {
@@ -11,51 +10,61 @@ import {
   ArcElement,
   Title,
   Tooltip,
-  PointElement, // Add PointElement here
+  PointElement,
   Legend,
 } from 'chart.js';
 import Header from '../components/Header';
 import SideBar from '../components/SideBar';
+import axios from 'axios';
 
 // Register the required components
 ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, ArcElement, Title, Tooltip, Legend, PointElement);
 
 const Dashboard = () => {
-  // Mock Data
-  const studentsData = [120, 150, 170, 210, 240];
-  const departmentsData = [5, 7, 10, 8, 9]; // Example department counts
-  const degreesData = [20, 25, 30, 35, 40]; // Example degree counts
-  const graduationRateData = [80, 85, 90, 88, 92]; // Example graduation rates
+  const [stats, setStats] = useState({
+    total_students: 0,
+    total_departments: 0,
+    total_degrees: 0,
+    graduation_rate: [],
+  });
 
-  const barData = {
-    labels: ['January', 'February', 'March', 'April', 'May'],
-    datasets: [
-      {
-        label: 'Total Students',
-        data: studentsData,
-        backgroundColor: '#13507F',
-      },
-    ],
-  };
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const response = await axios.get('http://127.0.0.1:8000/api/auth/dashboard-stats/');
+        setStats(response.data);
+      } catch (error) {
+        console.error('Error fetching dashboard stats:', error);
+      }
+    };
 
-  const lineData = {
-    labels: ['2020', '2021', '2022', '2023', '2024'],
+    fetchStats();
+  }, []);
+
+  // Map graduation rate data to labels and datasets for the chart
+  const lineChartData = {
+    labels: stats.graduation_rate.map((data) => data.year), // Years
     datasets: [
       {
         label: 'Graduation Rate (%)',
-        data: graduationRateData,
+        data: stats.graduation_rate.map((data) => data.graduation_rate), // Rates
         borderColor: '#FF6384',
-        fill: false,
+        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+        borderWidth: 2,
+        tension: 0.4, // Smooth curve
+        fill: true,
       },
     ],
   };
 
+  // Doughnut chart data
   const doughnutData = {
     labels: ['Departments', 'Degrees'],
     datasets: [
       {
-        data: [departmentsData.reduce((a, b) => a + b, 0), degreesData.reduce((a, b) => a + b, 0)],
+        data: [stats.total_departments, stats.total_degrees],
         backgroundColor: ['#FFCE56', '#36A2EB'],
+        hoverBackgroundColor: ['#FFCE56AA', '#36A2EBAA'],
       },
     ],
   };
@@ -66,11 +75,12 @@ const Dashboard = () => {
       <SideBar
         items={[
           { name: 'Dashboard', link: '/' },
+            { name: 'Users', link: '/users' },
           { name: 'Students', link: '/students' },
           { name: 'Departments & Degrees', link: '/departments' },
         ]}
       />
-      <div className="stats-container">
+      <div className="stats-container" style={{ padding: '20px' }}>
         <Grid container spacing={3}>
           <Grid item xs={12}>
             <Typography variant="h4" gutterBottom>
@@ -79,41 +89,30 @@ const Dashboard = () => {
           </Grid>
           <Grid item xs={12} md={6}>
             <Paper elevation={3} style={{ padding: '16px' }}>
-              <Typography variant="h6">Total Degrees</Typography>
-              <Typography variant="h4">{degreesData.reduce((a, b) => a + b, 0)}</Typography>
-            </Paper>
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <Paper elevation={3} style={{ padding: '16px' }}>
-              <Typography variant="h6">Average Graduation Rate</Typography>
-              <Typography variant="h4">{(graduationRateData.reduce((a, b) => a + b, 0) / graduationRateData.length).toFixed(2)}%</Typography>
-            </Paper>
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <Paper elevation={3} style={{ padding: '16px' }}>
-              <Typography variant="h6">Total Students Over Time</Typography>
-              <Bar data={barData} />
-            </Paper>
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <Paper elevation={3} style={{ padding: '16px' }}>
-              <Typography variant="h6">Graduation Rate (%) Over Years</Typography>
-              <Line data={lineData} />
-            </Paper>
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <Paper elevation={3} style={{ padding: '16px' }}>
-              <Typography variant="h6">Department vs Degree Count</Typography>
-              <Doughnut data={doughnutData} />
+              <Typography variant="h6">Total Students</Typography>
+              <Typography variant="h4">{stats.total_students}</Typography>
             </Paper>
           </Grid>
           <Grid item xs={12} md={6}>
             <Paper elevation={3} style={{ padding: '16px' }}>
               <Typography variant="h6">Total Departments</Typography>
-              <Typography variant="h4">{departmentsData.reduce((a, b) => a + b, 0)}</Typography>
+              <Typography variant="h4">{stats.total_departments}</Typography>
             </Paper>
           </Grid>
-          {/* Add more metrics as needed */}
+          <Grid item xs={12} md={6}>
+            <Paper elevation={3} style={{ padding: '16px' }}>
+              <Typography variant="h6">Graduation Rate (%) Over Years</Typography>
+              <Line data={lineChartData} />
+            </Paper>
+          </Grid>
+          <Grid item xs={12} md={6} style={{ height: '407px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+            <Paper elevation={3} style={{ padding: '16px', width: '100%', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+              <Typography variant="h6" style={{ textAlign: 'center', marginBottom: '16px' }}>Department vs Degree Count</Typography>
+              <div style={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                <Doughnut data={doughnutData} options={{ responsive: true, maintainAspectRatio: true }} />
+              </div>
+            </Paper>
+          </Grid>
         </Grid>
       </div>
     </>

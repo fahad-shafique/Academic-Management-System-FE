@@ -21,7 +21,6 @@ import {
   TextField,
   styled,
   Fab,
-  IconButton,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import Header from '../components/Header';
@@ -76,7 +75,20 @@ const Students = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [addDialogOpen, setAddDialogOpen] = useState(false);
-  const [csvFile, setCsvFile] = useState(null);
+  const [updateDialogOpen, setUpdateDialogOpen] = useState(false);
+  const [currentStudent, setCurrentStudent] = useState(null);
+  const [newStudentData, setNewStudentData] = useState({
+    sap_id: '',
+    admission_year: '',
+    graduation_year: '',
+    registration_date: '',
+    degree: '',
+    department: '',
+    user: '',
+    registered_by: '',
+    parent: '',
+    status: 'active'
+  });
 
   useEffect(() => {
     const fetchStudents = async () => {
@@ -121,41 +133,82 @@ const Students = () => {
 
   const handleAddDialogClose = () => {
     setAddDialogOpen(false);
-    setCsvFile(null);
+    setNewStudentData({
+      sap_id: '',
+      admission_year: '',
+      graduation_year: '',
+      registration_date: '',
+      degree: '',
+      department: '',
+      user: '',
+      registered_by: '',
+      parent: '',
+      status: 'active'
+    });
   };
 
-  const handleCsvUpload = (e) => {
-    setCsvFile(e.target.files[0]);
+  const handleUpdateDialogOpen = (student) => {
+    setCurrentStudent(student);
+    setNewStudentData({
+      sap_id: student.sap_id,
+      admission_year: student.admission_year,
+      graduation_year: student.graduation_year,
+      registration_date: student.registration_date,
+      degree: student.degree.degree_name,
+      department: student.department.department_name,
+    });
+    setUpdateDialogOpen(true);
   };
 
-  const handleUploadCsv = async () => {
-    const formData = new FormData();
-    formData.append('file', csvFile);
+  const handleUpdateDialogClose = () => {
+    setUpdateDialogOpen(false);
+  };
 
+  const handleUpdateStudent = async () => {
     try {
-      await axios.post('http://127.0.0.1:8000/api/auth/students/upload_csv/', formData, {
-        headers: {
-          Authorization: `Bearer ${authTokens.access}`,
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-      setCsvFile(null);
-      handleAddDialogClose();
-      // Refetch students after upload
+      const response = await axios.put(
+        `http://127.0.0.1:8000/api/auth/students/${currentStudent.id}/`,
+        newStudentData,
+        {
+          headers: {
+            Authorization: `Bearer ${authTokens.access}`,
+          },
+        }
+      );
+      const updatedStudent = response.data;
+      setStudents((prevStudents) =>
+        prevStudents.map((student) =>
+          student.id === updatedStudent.id ? updatedStudent : student
+        )
+      );
+      setUpdateDialogOpen(false);
+    } catch (error) {
+      console.error('Failed to update student:', error);
+    }
+  };
+
+  const handleAddStudent = async () => {
+    try {
+      const response = await axios.post(
+        'http://127.0.0.1:8000/api/auth/student/',
+        newStudentData,
+        {
+          headers: {
+            Authorization: `Bearer ${authTokens.access}`,
+          },
+        }
+      );
+      const addedStudent = response.data;
       const studentsResponse = await axios.get('http://127.0.0.1:8000/api/auth/students/', {
         headers: {
           Authorization: `Bearer ${authTokens.access}`,
         },
       });
       setStudents(studentsResponse.data);
+      setAddDialogOpen(false);
     } catch (error) {
-      console.error('Failed to upload CSV: ', error);
+      console.error('Failed to add student:', error);
     }
-  };
-
-  const handleUpdateStudent = (studentId) => {
-    // Implement update logic here
-    console.log('Updating student with ID: ', studentId);
   };
 
   const handleDeleteStudent = async (studentId) => {
@@ -182,6 +235,7 @@ const Students = () => {
         <SideBar
           items={[
             { name: 'Dashboard', link: '/' },
+            { name: 'Users', link: '/users' },
             { name: 'Students', link: '/students' },
             { name: 'Departments & Degrees', link: '/departments' },
           ]}
@@ -196,6 +250,10 @@ const Students = () => {
                 <StyledTableCell>Email</StyledTableCell>
                 <StyledTableCell>Department</StyledTableCell>
                 <StyledTableCell>Degree</StyledTableCell>
+                <StyledTableCell>Admission Year</StyledTableCell>
+                <StyledTableCell>Graduation Year</StyledTableCell>
+                <StyledTableCell>Registration Date</StyledTableCell>
+                <StyledTableCell>SAP ID</StyledTableCell>
                 <StyledTableCell>Actions</StyledTableCell>
               </TableRow>
             </StyledTableHead>
@@ -207,6 +265,10 @@ const Students = () => {
                   <TableCell>{student.user.email}</TableCell>
                   <TableCell>{student.department.department_name}</TableCell>
                   <TableCell>{student.degree.degree_name}</TableCell>
+                  <TableCell>{student.admission_year}</TableCell>
+                  <TableCell>{student.graduation_year}</TableCell>
+                  <TableCell>{student.registration_date}</TableCell>
+                  <TableCell>{student.sap_id}</TableCell>
                   <TableCell>
                     <Button size="small" onClick={() => handleExpandClick(student.id)}>
                       {expanded[student.id] ? 'Hide Details' : 'Show Details'}
@@ -219,7 +281,7 @@ const Students = () => {
                     </Collapse>
                     <Button
                       size="small"
-                      onClick={() => handleUpdateStudent(student.id)}
+                      onClick={() => handleUpdateDialogOpen(student)}
                       style={{ marginLeft: '10px' }}
                     >
                       Update
@@ -248,32 +310,217 @@ const Students = () => {
         />
       </RootContainer>
 
-      {/* Add Students Dialog */}
+      {/* Add New Student Dialog */}
       <Dialog open={addDialogOpen} onClose={handleAddDialogClose}>
-        <DialogTitle>Upload CSV to Add Students</DialogTitle>
+        <DialogTitle>Add New Student</DialogTitle>
         <DialogContent>
-          <Typography>
-            Please upload a CSV file with the following columns: First Name, Last Name, Email,
-            Department, Degree
-          </Typography>
-          <input
-            type="file"
-            accept=".csv"
-            onChange={handleCsvUpload}
-            style={{ marginTop: '10px' }}
+          <TextField
+            label="SAP ID"
+            value={newStudentData.sap_id}
+            onChange={(e) =>
+              setNewStudentData({
+                ...newStudentData,
+                sap_id: e.target.value,
+              })
+            }
+            fullWidth
+            style={{ marginBottom: '10px' }}
+          />
+          <TextField
+            label="Admission Year"
+            value={newStudentData.admission_year}
+            onChange={(e) =>
+              setNewStudentData({
+                ...newStudentData,
+                admission_year: Number(e.target.value),
+              })
+            }
+            fullWidth
+            style={{ marginBottom: '10px' }}
+          />
+          <TextField
+            label="Graduation Year"
+            value={newStudentData.graduation_year}
+            onChange={(e) =>
+              setNewStudentData({
+                ...newStudentData,
+                graduation_year: Number(e.target.value),
+              })
+            }
+            fullWidth
+            style={{ marginBottom: '10px' }}
+          />
+          <TextField
+            label="Registration Date"
+            value={newStudentData.registration_date}
+            onChange={(e) =>
+              setNewStudentData({
+                ...newStudentData,
+                registration_date: e.target.value,
+              })
+            }
+            fullWidth
+            style={{ marginBottom: '10px' }}
+          />
+          <TextField
+            label="Degree"
+            value={newStudentData.degree}
+            onChange={(e) =>
+              setNewStudentData({
+                ...newStudentData,
+                degree: e.target.value,
+              })
+            }
+            fullWidth
+            style={{ marginBottom: '10px' }}
+          />
+          <TextField
+            label="Department"
+            value={newStudentData.department}
+            onChange={(e) =>
+              setNewStudentData({
+                ...newStudentData,
+                department: e.target.value,
+              })
+            }
+            fullWidth
+            style={{ marginBottom: '10px' }}
+          />
+          <TextField
+            label="User ID"
+            value={newStudentData.user}
+            onChange={(e) =>
+              setNewStudentData({
+                ...newStudentData,
+                user: e.target.value,
+              })
+            }
+            fullWidth
+            style={{ marginBottom: '10px' }}
+          />
+          <TextField
+            label="Parent ID"
+            value={newStudentData.parent}
+            onChange={(e) =>
+              setNewStudentData({
+                ...newStudentData,
+                parent: e.target.value,
+              })
+            }
+            fullWidth
+            style={{ marginBottom: '10px' }}
+          />
+          <TextField
+            label="Registered By"
+            value={newStudentData.registered_by}
+            onChange={(e) =>
+              setNewStudentData({
+                ...newStudentData,
+                registered_by: e.target.value,
+              })
+            }
+            fullWidth
+            style={{ marginBottom: '10px' }}
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleAddDialogClose}>Cancel</Button>
-          <Button onClick={handleUploadCsv} disabled={!csvFile}>
-            Upload CSV
+          <Button onClick={handleAddDialogClose} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={handleAddStudent} color="primary">
+            Add Student
           </Button>
         </DialogActions>
       </Dialog>
+      <Dialog open={updateDialogOpen} onClose={handleUpdateDialogClose}>
+  <DialogTitle>Update Student</DialogTitle>
+  <DialogContent>
+    <TextField
+      label="SAP ID"
+      value={newStudentData.sap_id}
+      onChange={(e) =>
+        setNewStudentData({
+          ...newStudentData,
+          sap_id: e.target.value,
+        })
+      }
+      fullWidth
+      style={{ marginBottom: '10px' }}
+    />
+    <TextField
+      label="Admission Year"
+      value={newStudentData.admission_year}
+      onChange={(e) =>
+        setNewStudentData({
+          ...newStudentData,
+          admission_year: Number(e.target.value),
+        })
+      }
+      fullWidth
+      style={{ marginBottom: '10px' }}
+    />
+    <TextField
+      label="Graduation Year"
+      value={newStudentData.graduation_year}
+      onChange={(e) =>
+        setNewStudentData({
+          ...newStudentData,
+          graduation_year: Number(e.target.value),
+        })
+      }
+      fullWidth
+      style={{ marginBottom: '10px' }}
+    />
+    <TextField
+      label="Registration Date"
+      value={newStudentData.registration_date}
+      onChange={(e) =>
+        setNewStudentData({
+          ...newStudentData,
+          registration_date: e.target.value,
+        })
+      }
+      fullWidth
+      style={{ marginBottom: '10px' }}
+    />
+    <TextField
+      label="Degree"
+      value={newStudentData.degree}
+      onChange={(e) =>
+        setNewStudentData({
+          ...newStudentData,
+          degree: e.target.value,
+        })
+      }
+      fullWidth
+      style={{ marginBottom: '10px' }}
+    />
+    <TextField
+      label="Department"
+      value={newStudentData.department}
+      onChange={(e) =>
+        setNewStudentData({
+          ...newStudentData,
+          department: e.target.value,
+        })
+      }
+      fullWidth
+      style={{ marginBottom: '10px' }}
+    />
+  </DialogContent>
+  <DialogActions>
+    <Button onClick={handleUpdateDialogClose} color="secondary">
+      Cancel
+    </Button>
+    <Button onClick={handleUpdateStudent} color="primary">
+      Update
+    </Button>
+  </DialogActions>
+</Dialog>
 
       {/* Floating Action Button */}
-      <FloatingActionButton onClick={handleAddDialogOpen}>
-        <AddIcon style={{ color: '#E4A13A'}} />
+      <FloatingActionButton color="primary" onClick={handleAddDialogOpen}>
+        <AddIcon />
       </FloatingActionButton>
     </>
   );
