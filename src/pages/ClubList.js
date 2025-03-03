@@ -7,7 +7,7 @@ function ClubList() {
   const [clubs, setClubs] = useState([]);
 
   useEffect(() => {
-    axios.get('http://localhost:8000/api/ems/clubs/?page=1')
+    axios.get('http://localhost:8000/api/ems/clubs?page=1')
       .then(response => setClubs(response.data))
       .catch(error => console.error('Error fetching clubs:', error));
   }, []);

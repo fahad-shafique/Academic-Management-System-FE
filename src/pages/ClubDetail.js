@@ -8,7 +8,7 @@ function ClubDetail() {
   const [club, setClub] = useState(null);
 
   useEffect(() => {
-    axios.get(`http://localhost:8000/api/clubs/${id}/`)
+    axios.get(`http://localhost:8000/api/ems/clubs/${id}`)
       .then(response => setClub(response.data))
       .catch(error => console.error('Error fetching club details:', error));
   }, [id]);

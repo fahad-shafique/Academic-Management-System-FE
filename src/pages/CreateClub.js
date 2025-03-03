@@ -1,9 +1,11 @@
 // src/components/CreateClub.js
-import React, { useState } from 'react';
+import React, {useContext, useState} from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import AuthContext from "../context/AuthContext";
 
 function CreateClub() {
+  const { user, authTokens } = useContext(AuthContext);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [image, setImage] = useState(null);
@@ -16,7 +18,11 @@ function CreateClub() {
     formData.append('description', description);
     formData.append('image', image);
 
-    axios.post('http://localhost:8000/api/v1/my-clubs/', formData)
+    axios.post('http://localhost:8000/api/ems/my-clubs', formData, {
+          headers: {
+            Authorization: `Bearer ${authTokens.access}`,
+          },
+        })
       .then(response => {
         navigate('/');
       })

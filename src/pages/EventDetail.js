@@ -8,7 +8,7 @@ function EventDetail() {
   const [event, setEvent] = useState(null);
 
   useEffect(() => {
-    axios.get(`http://localhost:8000/api/events/${id}/`)
+    axios.get(`http://localhost:8000/api/ems/events/${id}`)
       .then(response => setEvent(response.data))
       .catch(error => console.error('Error fetching event details:', error));
   }, [id]);
