@@ -19,7 +19,7 @@ const Header = () => {
                 <Link to="/course"> <div className="menu-item">Courses</div></Link>
                 <Link to="/course"> <div className="menu-item">Projects</div></Link>
                 <Link to="/course"> <div className="menu-item">QS Ranking</div></Link>
-                <Link to="/course"> <div className="menu-item">Events</div></Link>
+                <Link to="/events"> <div className="menu-item">Events</div></Link>
             </>
         );
     } else if (user.user_type === 'student') {
@@ -30,7 +30,7 @@ const Header = () => {
                 <Link to="/course"> <div className="menu-item">Courses</div></Link>
                 <Link to="/course"> <div className="menu-item">Projects</div></Link>
                 <Link to="/course"> <div className="menu-item">QS Ranking</div></Link>
-                <Link to="/course"> <div className="menu-item">Events</div></Link>
+                <Link to="/events"> <div className="menu-item">Events</div></Link>
             </>
         );
     } else if (user.user_type === 'faculty') {
@@ -41,7 +41,7 @@ const Header = () => {
                 <Link to="/course"> <div className="menu-item">Courses</div></Link>
                 <Link to="/course"> <div className="menu-item">Projects</div></Link>
                 <Link to="/course"> <div className="menu-item">QS Ranking</div></Link>
-                <Link to="/course"> <div className="menu-item">Events</div></Link>
+                <Link to="/events"> <div className="menu-item">Events</div></Link>
             </>
         );
     } else if (user.user_type === 'parent') {
@@ -49,7 +49,7 @@ const Header = () => {
             <>
                 <Link to="/"> <div className="menu-item">Information</div></Link>
                 <Link to="/course"> <div className="menu-item">QS Ranking</div></Link>
-                <Link to="/course"> <div className="menu-item">Events</div></Link>
+                <Link to="/events"> <div className="menu-item">Events</div></Link>
             </>
         );
     } else if (user.user_type === 'alumni') {
@@ -58,7 +58,7 @@ const Header = () => {
                 <Link to="/"> <div className="menu-item">Information</div></Link>
                 <Link to="/course"> <div className="menu-item">Alumni</div></Link>
                 <Link to="/course"> <div className="menu-item">QS Ranking</div></Link>
-                <Link to="/course"> <div className="menu-item">Events</div></Link>
+                <Link to="/events"> <div className="menu-item">Events</div></Link>
             </>
         );
     }
